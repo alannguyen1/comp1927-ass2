@@ -69,5 +69,86 @@
     - port to an adjacent sea
     - sea to adjacent sea
     - sea to an adjacent port
-- RAIL MOVES: max distance moved == round number (0..366) + H# (0..3)
+- RAIL MOVES: max distance moved == round number (0..366) + H# (0..3) [check the spec, it doesn't really make sense ... ] 
+    - If you move more than 1 city you don't go into intermediate cities
+
+*** Hunter's Action *** 
+START OF ACTION
+- if (H in city in D's trail) - ALL H can see positions in trails that have moves 
+- if H in a city he will enctr: 
+    1. all the traps first 
+    2. any immature vampires 
+    3. then dracula himself 
+        - all these occur until he dies or all enctrs have occurred
+        - if immature vampire is enctred it is killed w/ no effect to H. 
+        - if D is enctred he loses 10 blood pts and H loses 4 life 
+- If hunter life <= 0 then teleports to hospital 
+    - next turn they have 9 life pts 
+    - teleport does not show up in game history; players will have to deduce they are in hospial
+
+END OF ACTION 
+- if H stays in same city they are resting and gain 3 life 
+
+
+~~~ Dracula's Turn ~~~
+- H can see D's location when he ends his turn in the castle or in city of the H 
+    - even if recent move was HIDE
+    - even if H is at location that D had moved to, no enctr, b/c enctr occurs in the action part of H's turn 
+
+*** Dracula's Move *** 
+- If (trail == 6 moves) oldest MOVE-- 
+    - When move leaves a trail its: 
+        - Trap vanishes 
+        - Vampire has matured 
+
+- If (! Legal move for D) teleport to castle
+
+- (! teleport move) == LOCATION || HIDE || DOUBLE_BACK
+    - LOCATION move != recent 5 locations 
+    - LOCATION move != adjacent rail 
+    - LOCATION move != hospitals  
+
+- HIDE move == stays in same city at start of turn
+    - if (HIDE move in trail) cannot make hide move
+    - cannot hide @ sea
+
+- DOUBLE_BACK == move to location adjacent && in trail 
+    - if (D_B in trail) cannot D_B
+    - if (D_B)
+        - H knows recent move is D_B 
+        - H knows position in the trial of the location he D_B to
+
+*** Dracula's Action *** 
+- D curr MOVE is in trail 
+- if (D in sea) hunters know he is in sea && D loses 2 health 
+- If (D is in city) places enctr:   // even if HIDE || D_B || teleport 
+    - enctr == (T || V)
+        - if (D in city && (round % 13 == 0)) enctr == V 
+        - else if (T < 3) enctr = T
+    - enctr cannot be placed @ sea
+- Game score is reduced by 1
+
+
+~~~ SPECIAL RULES ~~~
+*** Research *** 
+- if (H == rests && other hunters recently rested && more than 6 moves in trail) 
+    - 6th move in trail is revealed 
+
+*** HIDE or D_B moves 
+- if (H == city w/ HIDE or D_B in trail) all H know the move was HIDE or D_B,and they also learn the nature of the move to which the HIDE or D_B relates 
+
+- If (research = city w/ HIDE or D_B in trail) same as above
+
+- H can see whenever the 6th move in trail was a HIDE, but they do not learn the nature of the move to which it relates 
+
+*** No more secrets ***
+- H can co-operate using messages to communicate
+- D can hear everything 
+
+~~~ EXTRA RULES ~~~ 
+- D cannot place an enctr if more than 3 
+
+
+
+
 
