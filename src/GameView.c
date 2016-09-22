@@ -87,11 +87,11 @@ static void analyseMove(char move[], GameView g)
     // otherwise there will be buffer overflow
     // Khaled said go back to COMP1917 
     PlayerID player = move[0];
-    char location[2];
+    char location[3];
     memcpy(location, &move[1], 2);
     location[2] = '\0';
     LocationID currLocation = abbrevToID(location);
-    char actions[4];
+    char actions[5];
     memcpy(actions, &move[3], 4);
     actions[4] = '\0';
     //Do stuff if it's a dracula
@@ -133,7 +133,7 @@ static void analyseMove(char move[], GameView g)
         }
         checkDracSea(g);
         // Encounter
-        char encounter[2];
+        char encounter[3];
         memcpy(encounter, &actions[0], 2);
         encounter[2] = '\0';
         for (int i = 0; i < 2; i++) {
@@ -145,7 +145,7 @@ static void analyseMove(char move[], GameView g)
         }
 
         //Action
-        char action[2];
+        char action[3];
         memcpy(action, &actions[2], 2);
         action[2] = '\0';
         for (int i = 0; i < 2; i++) {
@@ -377,10 +377,11 @@ void disposeGameView(GameView toBeDeleted)
 {
     //COMPLETE THIS IMPLEMENTATION
     assert(toBeDeleted != NULL);
-    for (int i = 0; i < TRAIL_SIZE; i++) {
+    disposeMap(toBeDeleted->map);
+    for (int i = 0; i < NUM_PLAYERS; i++) {
         free(toBeDeleted->players[i]);
     }
-    free( toBeDeleted );
+    free ( toBeDeleted );
 }
 
 

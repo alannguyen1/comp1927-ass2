@@ -115,8 +115,9 @@ int main()
     PlayerMessage messages12[] = {"Hello"};
     gv = newGameView("GAT....", messages12);
     assert(getRound(gv) == 0);
-    assert(getLocation(gv, PLAYER_LORD_GODALMING) == ATHENS);
     assert(getCurrentPlayer(gv) == PLAYER_DR_SEWARD);
+    assert(getLocation(gv, PLAYER_DR_SEWARD) == UNKNOWN_LOCATION);
+    assert(getLocation(gv, PLAYER_LORD_GODALMING) == ATHENS);
     assert(getHealth(gv, PLAYER_DRACULA) == GAME_START_BLOOD_POINTS);
     printf("passed\n");
     disposeGameView(gv);

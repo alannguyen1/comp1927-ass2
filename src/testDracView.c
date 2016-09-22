@@ -102,6 +102,7 @@ int main()
     PlayerMessage messages7[] = {"Leaving Athens by train"};
     dv = newDracView("GAT....", messages7);
     edges = whereCanTheyGo(dv,&size,PLAYER_LORD_GODALMING,0,1,0);
+    printf("size is %d\n", size);
     assert(size == 1);
     assert(edges[0] == ATHENS);
     free(edges);
