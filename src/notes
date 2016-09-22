@@ -1,0 +1,73 @@
+/////// RULES ///////
+~~~ How the game works ~~~
+*** Overview ***
+- Drac knows where Hunters are
+    - Hunters do not
+
+- if hunter enters into trial (last 6 moves) of dracula they can determine when he was there 
+
+*** The fine print ***
+-Every 13 rounds Drac leaves an immature vampire 
+    - if hunter finds sleeping immature vampire then he can kill it
+
+- Drac puts T or V when he enters a city 
+
+- if (hunter life pts == 0) teleport to hospital to get full health 
+
+- if (drac health == 0) dead
+
+- hunter can only move by road, rail or sea 
+
+- Drac only road & sea
+    - Loses 2 life every turn he is at sea
+
+-moving by road moves my 1 single segment 
+
+-moving by rail is random and can move you 0..3 segments 
+
+- H and D cannot encounter each other at sea 
+    -H knows when D is at sea and when he lands in a city 
+
+*** Poor Dracular ***
+- D cannot move to a place in his trail EXCEPT: 
+    - HIDE move and can remain in the same city for a 2nd turn. No hiding @ sea. 
+        - Only 1 HIDE in his trail 
+
+    - DOUBLE_BACK move which lets him revisit a city BUT H will know he has done so. 
+
+
+~~~ RULES OF THE GAME ~~~
+*** SCORE *** 
+- Read spec 
+
+*** DRACULA ***
+- Has 40 life 
+- loses 10 for encounter w/ H
+- loses 2 if at sea
+- Can gain 10 if @ Castle & he can exceed 40 life 
+- 0 life means game ends and score is final
+
+*** HUNTERS ***
+- 4 hunters
+- each 9 life 
+- if enctr a T lose 2 life 
+- if enctr D lose 4 life 
+- gains 4 life if stays in same city 
+- cannot exceed 9 life 
+
+*** SEQUENCE OF PLAY ***
+- Each character has a MOVE and an ACTION 
+- 1st round they can move to any location 
+    - D cannot move to hospital
+- End game if D life <= 0 || game score <= 0
+
+
+~~~ Hunter's Turn ~~~
+*** Hunter's Move *** 
+- ROAD MOVE: can move to any directly connected city 
+- SEA MOVE: can move from a:
+    - port to an adjacent sea
+    - sea to adjacent sea
+    - sea to an adjacent port
+- RAIL MOVES: max distance moved == round number (0..366) + H# (0..3)
+
