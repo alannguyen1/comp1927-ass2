@@ -1,4 +1,4 @@
-// testHunterView.c ... test the HunterView ADT
+// test_HunterView.c ... test the HunterView ADT
 
 #include <stdio.h>
 #include <stdlib.h>
