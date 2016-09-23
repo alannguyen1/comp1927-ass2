@@ -21,15 +21,6 @@ HunterView newHunterView(char *pastPlays, PlayerMessage messages[])
     HunterView hunterView = malloc(sizeof(struct hunterView));
     hunterView->g = newGameView(pastPlays, messages); //we should have a dupe of gameview with all its shit filled correct/
     return hunterView;
-    
-    //fill up trail with draculas shit?
-    //for (int i = 0; i < TRAIL_SIZE-1; i++) {
-    //    hunterView->DracTrail[i] = hunterView->g->players[PLAYER_DRACULA]->history[i]; //we dont know where he is for whole string at start
-    //}
-    getHistory(hunterView->g, PLAYER_DRACULA, hunterView->DracTrail);
-    //now the trail is filled with draculas true locations
-    //more easily accessed to mashallah
-    
 }
 
 // Frees all memory previously allocated for the HunterView toBeDeleted
@@ -142,6 +133,5 @@ LocationID *whereCanTheyGo(HunterView currentView, int *numLocations,
             Locs = connectedLocations(currentView->g, numLocations,currLoc,player,currRound, road ,rail, sea);
         }
     }
-    //printf("NumLocs right now is: %d\n", *numLocations);
     return Locs;
 }

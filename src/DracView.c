@@ -32,29 +32,22 @@ DracView newDracView(char *pastPlays, PlayerMessage messages[])
 {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     DracView dracView = malloc(sizeof(struct dracView));
-
     dracView->g = newGameView(pastPlays, messages);
-
     memset(dracView->Traps, 0, NUM_MAP_LOCATIONS* sizeof(LocationID));
 
-
     for (int i = 0; i < NUM_PLAYERS; i++) {
-        printf("setting for player %d\n", i);
         dracView->players[i] = malloc(sizeof(struct _player));
         int size, *edges;
         if (getLocation(dracView->g, i) == UNKNOWN_LOCATION) break;
         memset(dracView->players[i]->connections, 0, sizeof(dracView->players[i]->connections));
         edges = connectedLocations(dracView->g, &size, getLocation(dracView->g, i), i, getRound(dracView->g), TRUE, TRUE, TRUE);
-        printf("edges done\n");
         for (int j = 0; j < size; j++) {
             dracView->players[i]->connections[edges[j]] = 1;
         }
         free(edges);
-        printf("finished for player %d\n", i);
     }
     analyseTraps(dracView, pastPlays);
     return dracView;
-
 }
 
 static void analyseTraps(DracView dracView, char *pastPlays)
@@ -206,7 +199,6 @@ LocationID *whereCanIgo(DracView currentView, int *numLocations, int road, int s
     }
     *numLocations = k;
 
-//    LocationID moves[NUM_MAP_LOCATIONS];
     return moves;
 }
 
@@ -214,31 +206,6 @@ LocationID *whereCanIgo(DracView currentView, int *numLocations, int road, int s
 LocationID *whereCanTheyGo(DracView currentView, int *numLocations,
                            PlayerID player, int road, int rail, int sea)
 {
-    // LocationID *moves = (LocationID *)malloc(currentView->players[player]->numLocations*sizeof(LocationID));
-    // int k = 0;
-    // if (player == PLAYER_DRACULA) {
-    //     moves = whereCanIgo(currentView, numLocations,road, sea);
-    //     return moves;
-    // }
-    // for (int i = 0; i < NUM_MAP_LOCATIONS; i++) {
-    //     if ( currentView->players[player]->connections[i] == 1 ) {
-    //         printf("name of location is %s\n", idToName(i));
-    //         if (road == TRUE && idToType(i) == ROAD) {
-    //             moves[k] = i;
-    //             k++;
-    //         }
-    //         if (rail == TRUE && idToType(i) == RAIL) {
-    //             moves[k] = i;
-    //             k++;
-    //         }
-    //         if (sea == TRUE && (idToType(i) == SEA || idToType(i) == SEA_UNKNOWN)) {
-    //             moves[k] = i;
-    //             k++;
-    //         }
-    //     }
-    // }
-    // printf("K is %d\n", k);
-    // *numLocations = k;
     Round currRound = giveMeTheRound(currentView);
     LocationID currLoc = getLocation(currentView->g, player);
     LocationID * Locs;
@@ -254,6 +221,5 @@ LocationID *whereCanTheyGo(DracView currentView, int *numLocations,
     } else {
         Locs = connectedLocations(currentView->g, numLocations,currLoc,player,currRound, road ,rail, sea);
     }
-    //printf("NumLocs right now is: %d\n", *numLocations);
     return Locs;
 }
