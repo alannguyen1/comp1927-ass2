@@ -125,7 +125,7 @@ static void analyseMove(char move[], GameView g)
         } else if (strcmp("TP", location) == 0) {
             g->players[PLAYER_DRACULA]->current = CASTLE_DRACULA;
             addToTrail(PLAYER_DRACULA, g, CASTLE_DRACULA);
-            g->players[PLAYER_DRACULA]->health = LIFE_GAIN_CASTLE_DRACULA;
+            g->players[PLAYER_DRACULA]->health += LIFE_GAIN_CASTLE_DRACULA;
         } else if (strcmp("..", location) == 0){
             // do nothing
         } else {
@@ -168,8 +168,9 @@ static void analyseMove(char move[], GameView g)
                 case 'M': currHunter = PLAYER_MINA_HARKER; break;
             }
         //make a case if hunter has previously died, if so, reset health cuz he is good to go
-        if (g->players[currHunter]->current == ST_JOSEPH_AND_ST_MARYS && g->players[currHunter]->health == 0) {
+        if (g->players[currHunter]->current == ST_JOSEPH_AND_ST_MARYS && g->players[currHunter]->health <= 0) {
             g->players[currHunter]->health = GAME_START_HUNTER_LIFE_POINTS;
+
         }
         // Move the player
         g->players[currHunter]->current = currLocation;
@@ -189,6 +190,7 @@ static void analyseMove(char move[], GameView g)
                 // player is dead dracula is alive
                 g->players[currHunter]->health = 0;
                 g->players[currHunter]->current = ST_JOSEPH_AND_ST_MARYS;
+                g->score -= SCORE_LOSS_HUNTER_HOSPITAL;
                 addToTrail(currHunter, g, currLocation);
                 break;
             } else if (g->players[PLAYER_DRACULA]->health <= 0) {
