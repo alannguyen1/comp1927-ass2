@@ -1,4 +1,4 @@
-// testDracView.c ... test the DracView ADT
+// test_DracView.c ... test the DracView ADT
 
 #include <stdio.h>
 #include <stdlib.h>

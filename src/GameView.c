@@ -25,7 +25,7 @@ struct gameView {
 
 typedef struct _player {
     int health;
-    LocationID current;
+    LocationID currLoc;
     LocationID history[TRAIL_SIZE];
 } *Player;
 
@@ -38,7 +38,7 @@ static void actionV(PlayerID player, GameView g);
 static int calculateArrayLength(char* pastPlays);
 static void addToTrail(PlayerID player, GameView g, LocationID currLocation);
 static void checkDracSea(GameView g);
-
+int isResting(char *act);
 // Drac Actions
 static void dracT(GameView g);
 static void dracIV(GameView g);
@@ -82,54 +82,52 @@ static int calculateArrayLength(char* pastPlays)
 }
 
 static void analyseMove(char move[], GameView g)
-{   // when you initialise an array you have to 
-    // write the array size in the square brackets
-    // you need an extra byte for a null terminator
-    // otherwise there will be buffer overflow
-    // Khaled said go back to COMP1917 
+{   
     PlayerID player = move[0];
     char location[3];
     memcpy(location, &move[1], 2);
     location[2] = '\0';
     LocationID currLocation = abbrevToID(location);
+    
     char actions[5];
     memcpy(actions, &move[3], 4);
     actions[4] = '\0';
+
     //Do stuff if it's a dracula
     if (player == 'D') {
         // move phase
-        if (strcmp("C?",location) == 0) {
-            g->players[PLAYER_DRACULA]->current = CITY_UNKNOWN;
+        if (!strcmp("C?",location)) {
+            g->players[PLAYER_DRACULA]->currLoc = CITY_UNKNOWN;
             addToTrail(PLAYER_DRACULA, g, CITY_UNKNOWN);
-        } else if (strcmp("S?", location) == 0) {
-            g->players[PLAYER_DRACULA]->current = SEA_UNKNOWN;
+        } else if (!strcmp("S?", location)) {
+            g->players[PLAYER_DRACULA]->currLoc = SEA_UNKNOWN;
             addToTrail(PLAYER_DRACULA, g, SEA_UNKNOWN);
-        } else if (strcmp("HI", location) == 0) {
-            g->players[PLAYER_DRACULA]->current = HIDE;
+        } else if (!strcmp("HI", location)) {
+            g->players[PLAYER_DRACULA]->currLoc = HIDE;
             addToTrail(PLAYER_DRACULA, g, HIDE);
-        } else if (strcmp("D1", location) == 0) {
-            g->players[PLAYER_DRACULA]->current = DOUBLE_BACK_1;
+        } else if (!strcmp("D1", location)) {
+            g->players[PLAYER_DRACULA]->currLoc = DOUBLE_BACK_1;
             addToTrail(PLAYER_DRACULA, g, DOUBLE_BACK_1);
-        } else if (strcmp("D2", location) == 0) {
-            g->players[PLAYER_DRACULA]->current = DOUBLE_BACK_2;
+        } else if (!strcmp("D2", location)) {
+            g->players[PLAYER_DRACULA]->currLoc = DOUBLE_BACK_2;
             addToTrail(PLAYER_DRACULA, g, DOUBLE_BACK_2);
-        } else if (strcmp("D3", location) == 0) {
-            g->players[PLAYER_DRACULA]->current = DOUBLE_BACK_3;
+        } else if (!strcmp("D3", location)) {
+            g->players[PLAYER_DRACULA]->currLoc = DOUBLE_BACK_3;
             addToTrail(PLAYER_DRACULA, g, DOUBLE_BACK_3);
-        } else if (strcmp("D4", location) == 0) {
-            g->players[PLAYER_DRACULA]->current = DOUBLE_BACK_4;
+        } else if (!strcmp("D4", location)) {
+            g->players[PLAYER_DRACULA]->currLoc = DOUBLE_BACK_4;
             addToTrail(PLAYER_DRACULA, g, DOUBLE_BACK_4);
-        } else if (strcmp("D5", location) == 0) {
-            g->players[PLAYER_DRACULA]->current = DOUBLE_BACK_5;
+        } else if (!strcmp("D5", location)) {
+            g->players[PLAYER_DRACULA]->currLoc = DOUBLE_BACK_5;
             addToTrail(PLAYER_DRACULA, g, DOUBLE_BACK_5);
-        } else if (strcmp("TP", location) == 0) {
-            g->players[PLAYER_DRACULA]->current = CASTLE_DRACULA;
+        } else if (!strcmp("TP", location)) {
+            g->players[PLAYER_DRACULA]->currLoc = CASTLE_DRACULA;
             addToTrail(PLAYER_DRACULA, g, CASTLE_DRACULA);
             g->players[PLAYER_DRACULA]->health += LIFE_GAIN_CASTLE_DRACULA;
-        } else if (strcmp("..", location) == 0){
+        } else if (!strcmp("..", location)){
             // do nothing
         } else {
-            g->players[PLAYER_DRACULA]->current = abbrevToID(location);
+            g->players[PLAYER_DRACULA]->currLoc = abbrevToID(location);
             addToTrail(PLAYER_DRACULA, g, abbrevToID(location));
         }
         checkDracSea(g);
@@ -168,13 +166,26 @@ static void analyseMove(char move[], GameView g)
                 case 'M': currHunter = PLAYER_MINA_HARKER; break;
             }
         //make a case if hunter has previously died, if so, reset health cuz he is good to go
-        if (g->players[currHunter]->current == ST_JOSEPH_AND_ST_MARYS && g->players[currHunter]->health <= 0) {
-            g->players[currHunter]->health = GAME_START_HUNTER_LIFE_POINTS;
+        if (g->players[currHunter]->currLoc == ST_JOSEPH_AND_ST_MARYS && g->players[currHunter]->health <= 0) {
+            g->players[currHunter]->health = GAME_START_HUNTER_LIFE_POINTS; 
 
         }
+
         // Move the player
-        g->players[currHunter]->current = currLocation;
+        g->players[currHunter]->currLoc = currLocation;
         addToTrail(currHunter, g, currLocation);
+
+        // increase health if hunters rests in the same city
+        // but not if encouters Draculla
+        if (g->currentRound > 1){
+            if (g->players[currHunter]->currLoc == 
+                g->players[currHunter]->history[1] && isResting(actions))
+            {
+                g->players[currHunter]->health += LIFE_GAIN_REST;
+                if (g->players[currHunter]->health > 9) 
+                    g->players[currHunter]->health = 9;
+            }
+        }  
 
         // Make the action?
         for (int i=0; i < 4; i++) {
@@ -188,8 +199,7 @@ static void analyseMove(char move[], GameView g)
                 }
             } else if (g->players[currHunter]->health <= 0 && g->players[PLAYER_DRACULA]->health > 0) {
                 // player is dead dracula is alive
-                g->players[currHunter]->health = 0;
-                g->players[currHunter]->current = ST_JOSEPH_AND_ST_MARYS;
+                g->players[currHunter]->currLoc = ST_JOSEPH_AND_ST_MARYS;
                 g->score -= SCORE_LOSS_HUNTER_HOSPITAL;
                 addToTrail(currHunter, g, currLocation);
                 break;
@@ -204,13 +214,13 @@ static void analyseMove(char move[], GameView g)
 
 static void dracT(GameView g)
 {
-    LocationID curr = g->players[PLAYER_DRACULA]->current;
+    LocationID curr = g->players[PLAYER_DRACULA]->currLoc;
     g->Traps[curr] += 1;
 }
 
 static void dracIV(GameView g)
 {
-    LocationID curr = g->players[PLAYER_DRACULA]->current;
+    LocationID curr = g->players[PLAYER_DRACULA]->currLoc;
     g->immatureVampire = curr;
 }
 
@@ -235,11 +245,11 @@ static void actionT(PlayerID player, GameView g)
 static void checkDracSea(GameView g)
 {
     Player Dracula = g->players[PLAYER_DRACULA];
-    if (Dracula->current == SEA_UNKNOWN) {
+    if (Dracula->currLoc == SEA_UNKNOWN) {
         Dracula->health -= LIFE_LOSS_SEA;
         return;
     }
-    if (Dracula->current == DOUBLE_BACK_1) {
+    if (Dracula->currLoc == DOUBLE_BACK_1) {
         if (Dracula->history[1] == SEA_UNKNOWN) {
             Dracula->health -= LIFE_LOSS_SEA;
             return;
@@ -251,7 +261,7 @@ static void checkDracSea(GameView g)
             }
         }
     }
-    if (Dracula->current == DOUBLE_BACK_2) {
+    if (Dracula->currLoc == DOUBLE_BACK_2) {
         if (Dracula->history[2] == SEA_UNKNOWN) {
             Dracula->health -= LIFE_LOSS_SEA;
             return;
@@ -263,7 +273,7 @@ static void checkDracSea(GameView g)
             }
         }
     }
-    if (Dracula->current == DOUBLE_BACK_3) {
+    if (Dracula->currLoc == DOUBLE_BACK_3) {
         if (Dracula->history[3] == SEA_UNKNOWN) {
             Dracula->health -= LIFE_LOSS_SEA;
             return;
@@ -275,7 +285,7 @@ static void checkDracSea(GameView g)
             }
         }
     }
-    if (Dracula->current == DOUBLE_BACK_4) {
+    if (Dracula->currLoc == DOUBLE_BACK_4) {
         if (Dracula->history[4] == SEA_UNKNOWN) {
             Dracula->health -= LIFE_LOSS_SEA;
             return;
@@ -287,7 +297,7 @@ static void checkDracSea(GameView g)
             }
         }
     }
-    if (Dracula->current == DOUBLE_BACK_5) {
+    if (Dracula->currLoc == DOUBLE_BACK_5) {
         if (Dracula->history[5] == SEA_UNKNOWN) {
             Dracula->health -= LIFE_LOSS_SEA;
             return;
@@ -299,8 +309,8 @@ static void checkDracSea(GameView g)
             }
         }
     }
-    if (validPlace(Dracula->current)) {
-        if (idToType(Dracula->current) == SEA) {
+    if (validPlace(Dracula->currLoc)) {
+        if (idToType(Dracula->currLoc) == SEA) {
             Dracula->health -= LIFE_LOSS_SEA;
             return;
         }
@@ -311,8 +321,8 @@ static void actionD(PlayerID player, GameView g)
 {
     g->players[player]->health = g->players[player]->health - LIFE_LOSS_DRACULA_ENCOUNTER;
     g->players[PLAYER_DRACULA]->health = g->players[PLAYER_DRACULA]->health - LIFE_LOSS_HUNTER_ENCOUNTER;
-    g->players[PLAYER_DRACULA]->current = g->players[player]->current;
-    g->players[PLAYER_DRACULA]->history[0] = g->players[player]->current;
+    g->players[PLAYER_DRACULA]->currLoc = g->players[player]->currLoc;
+    g->players[PLAYER_DRACULA]->history[0] = g->players[player]->currLoc;
 }
 
 static void actionV(PlayerID player, GameView g)
@@ -334,9 +344,14 @@ static void addToTrail(PlayerID player, GameView g, LocationID currLocation)
     }
     g->players[player]->history[0] = currLocation;
 }
+  
+int isResting(char *act){
+        for (int i = 0; i < 3; i++) {
+            if (act[i] == 'T' || act[i] == 'D') return 0;
+        }
+        return 1;
+}   
 
-
-     
 static void setInitialState(GameView g)
 {
     g->map = newMap();
@@ -354,23 +369,23 @@ static void setInitialState(GameView g)
     
 
     g->players[PLAYER_LORD_GODALMING]->health = GAME_START_HUNTER_LIFE_POINTS;
-    g->players[PLAYER_LORD_GODALMING]->current = NOWHERE;
+    g->players[PLAYER_LORD_GODALMING]->currLoc = NOWHERE;
     memset ( g->players[PLAYER_LORD_GODALMING]->history, NOWHERE, sizeof ( g->players[PLAYER_LORD_GODALMING]->history));
 
     g->players[PLAYER_DR_SEWARD]->health = GAME_START_HUNTER_LIFE_POINTS;
-    g->players[PLAYER_DR_SEWARD]->current = NOWHERE;
+    g->players[PLAYER_DR_SEWARD]->currLoc = NOWHERE;
     memset ( g->players[PLAYER_DR_SEWARD]->history, NOWHERE, sizeof ( g->players[PLAYER_DR_SEWARD]->history));
 
     g->players[PLAYER_VAN_HELSING]->health = GAME_START_HUNTER_LIFE_POINTS;
-    g->players[PLAYER_VAN_HELSING]->current = NOWHERE;
+    g->players[PLAYER_VAN_HELSING]->currLoc = NOWHERE;
     memset ( g->players[PLAYER_VAN_HELSING]->history, NOWHERE, sizeof ( g->players[PLAYER_VAN_HELSING]->history));
     
     g->players[PLAYER_MINA_HARKER]->health = GAME_START_HUNTER_LIFE_POINTS;
-    g->players[PLAYER_MINA_HARKER]->current = NOWHERE;
+    g->players[PLAYER_MINA_HARKER]->currLoc = NOWHERE;
     memset ( g->players[PLAYER_MINA_HARKER]->history, NOWHERE, sizeof ( g->players[PLAYER_MINA_HARKER]->history));
 
     g->players[PLAYER_DRACULA]->health = GAME_START_BLOOD_POINTS;
-    g->players[PLAYER_DRACULA]->current = NOWHERE;
+    g->players[PLAYER_DRACULA]->currLoc = NOWHERE;
     memset ( g->players[PLAYER_DRACULA]->history, NOWHERE, sizeof ( g->players[PLAYER_DRACULA]->history));
 
 }
@@ -416,7 +431,7 @@ int getHealth(GameView currentView, PlayerID player)
 // Get the current location id of a given player
 LocationID getLocation(GameView currentView, PlayerID player)
 {
-    return currentView->players[player]->current;
+    return currentView->players[player]->currLoc;
 }
 
 //// Functions that return information about the history of the game
